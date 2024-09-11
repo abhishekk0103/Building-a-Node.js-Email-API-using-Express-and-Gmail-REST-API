@@ -13,5 +13,5 @@ This project demonstrates a Node.js server that uses Gmail's REST API to send em
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-repo/gmail-email-api.git
-   cd gmail-email-api
+   git clone https://github.com/abhishekk0103/Building-a-Node.js-Email-API-using-Express-and-Gmail-REST-API
+   cd Building-a-Node.js-Email-API-using-Express-and-Gmail-REST-API

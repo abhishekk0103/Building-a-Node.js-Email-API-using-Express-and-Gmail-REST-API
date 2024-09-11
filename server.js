@@ -1,22 +1,3 @@
-// // server.js File
-// const express = require("express"); 
-
-// const app = express();
-
-// const port = 8000; 
-
-// app.listen(port, function (err) {
-//   if (err) {
-//     console.log("Error while starting server");
-//   } else {
-//     console.log("Server has been started at " + port);
-//   }
-// });
-
-// app.get('/', function (req, res) {
-// 	res.send('we are at the root route of our server');
-// })
-
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
@@ -24,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const qs = require('qs');
-const {google} = require('googleapis')
+// const {google} = require('googleapis')
 
 const app = express();
 app.use(bodyParser.json());
@@ -32,40 +13,25 @@ app.use(bodyParser.json());
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, PORT, TOKEN_PATH } = process.env;
 
+// home page
+app.get('/', async(req, res) => {
+    res.send('Welcome to Gmail API with NodeJS');
+});
+
 //auth initiate
 app.get('/auth/initiate', (req, res) => {
-    // const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=https://www.googleapis.com/auth/gmail.send&access_type=offline&prompt=consent`;
-    // res.redirect(authUrl);
-	// window.alert("loggedin");
-	// console.log("loggedin")
-	
-		try {
-		  const oauth2Client = new google.auth.OAuth2(
-			process.env.CLIENT_ID,
-			process.env.CLIENT_SECRET,
-			process.env.REDIRECT_URI
-		  );
-	  
-		  // generate a URL that asks permissions for Gmail scopes
-		  const scopes = ["https://www.googleapis.com/auth/gmail.send"];
-	  
-		  const url = oauth2Client.generateAuthUrl({
-			access_type: "offline", // gets refresh_token
-			scope: scopes,
-		  });
-	  
-		  return res.redirect(url);
-		} catch (err) {
-		  console.log(err);
-		  return res.status(401).json({ message: "Invalid credentials" });
-		}
-
+    try {
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=https://www.googleapis.com/auth/gmail.send&access_type=offline&prompt=consent`;
+        res.redirect(authUrl);
+    } catch (error) {
+        console.log(error);
+		  return res.status(401).json({ message: "Invalid credentials Entered" });
+    }
 });
-// 1//04cchxPSYAzEgCgYIARAAGAQSNwF-L9IrQ2F1wEhLMZcsxIukCB0wg4QwkbSx54_QYXGCFNo1bTRJ1Ei_0H5ffJ8_n1kQRQnms6U
+
 //auth callback
 app.get('/auth/callback', async (req, res) => {
     const { code } = req.query;
-
     try {
 		// const {code} = 
         const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', qs.stringify({
@@ -74,8 +40,11 @@ app.get('/auth/callback', async (req, res) => {
             client_secret: CLIENT_SECRET,
             redirect_uri: REDIRECT_URI,
             grant_type: 'authorization_code',
-        }));
-		// const {code} = code
+        }), {
+            headers: {
+                'Content-Type' : 'application/x-www-form-urlencoded',
+            }
+        });
         const tokens = tokenResponse.data;
         fs.writeFileSync(path.resolve(__dirname, TOKEN_PATH), JSON.stringify(tokens, null, 2));
         res.send('OAuth2 Token acquired and stored.');
